@@ -98,3 +98,22 @@ Getting labels (day) and data (downloads).
 3. Sum all downloads of the same year
 
 Refactor as to extract month and week totals from process. Introduction of helper method to extract logic.
+
+## Transforming time
+
+Creating new data models `rawData` to hold downloads data gotten from the api call, `downloadsYear: []` and `labelsYear: []`. New method `formatYear()`.
+
+Axios promise assigns `data.downloads` to `rawData` and calls `formatYear()`.
+
+### Additional helper methods
+
+For different data transformations of weekly and monthly.
+
+1. removeDuplicate (a, b) {...}
+2. getDownloadsPerYear(data) {...}
+
+Import both modules in **Start** and use in `formatYear()` method.
+
+### To get unique dates
+
+Chain a `map()` to `reduce()` and return an object with the date and downloads of that date. `filter()` and `dateToYear()` helper, with a final `map()` to clean things up.

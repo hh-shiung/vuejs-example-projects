@@ -23,9 +23,10 @@
       <h1 class="title" v-if="loaded">
         {{ packageName }}
       </h1>
+      
       <div class="chart-container" v-if="loaded">
         <div class="chart-title">
-          Downloads per Day <span>{{ period }}</span>
+          Downloads per Day <span>{{ formattedPeriod }}</span>
           <hr />
         </div>
         <div class="chart-content">
@@ -36,6 +37,21 @@
           ></line-chart>
         </div>
       </div>
+
+      <div class="chart-container" v-if="loaded">
+        <div class="chart-title">
+          Downloads per Year <span>{{ formattedPeriod }}</span>
+          <hr />
+        </div>
+        <div class="chart-content">
+          <line-chart 
+            v-if="loaded"
+            :chart-data="downloadsYear"
+            :chart-labels="labelsYear"
+          ></line-chart>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -45,7 +61,8 @@ import axios from 'axios'
 import Datepicker from 'vuejs-datepicker'
 import LineChart from '@/components/LineChart'
 
-import {dateToDay, dateBeautify} from '../utils/dateFormatter.js'
+import {dateToYear, dateToDay, dateBeautify} from '../utils/dateFormatter.js'
+import {removeDuplicate, getDownloadsPerYear} from '../utils/downloadFormatter.js'
 
 export default {
   components: {
@@ -58,11 +75,15 @@ export default {
       packageName: '',
       loaded: false,
       downloads: [],
+      downloadsYear: [],
       labels: [],
+      labelsYear: [],
       showError: false,
       errorMessage: 'Please enter a package name',
       periodStart: '',
-      periodEnd: new Date()
+      periodEnd: new Date(),
+      rawData: '',
+      totalDownloads: ''
     }
   },
   mounted () {
@@ -100,16 +121,23 @@ export default {
         return
       }
       this.resetState()
-      axios.get(`https://api.npmjs.org/downloads/range/${this.period}/${this.package}`).then(response => {
-        this.downloads = response.data.downloads.map(entry => entry.downloads)
-        this.labels = response.data.downloads.map(entry => entry.day)
-        this.packageName = response.data.package
-        this.setURL()
-        this.loaded = true
-      }).catch(err => {
-        this.errorMessage = err.response.data.error
-        this.showError = true
-      })
+      axios.get(`https://api.npmjs.org/downloads/range/${this.period}/${this.package}`)
+        .then(response => {
+          this.rawData = response.data.downloads
+          this.downloads = response.data.downloads.map(entry => entry.downloads)
+          this.labels = response.data.downloads.map(entry => entry.day)
+          this.packageName = response.data.package
+          this.formatYear()
+          this.setURL()
+          this.loaded = true
+        }).catch(err => {
+          this.errorMessage = err.response.data.error
+          this.showError = true
+        })
+    },
+    formatYear () {
+      this.labelsYear = this.rawData.map(entry => dateToYear(entry.day)).reduce(removeDuplicate, [])
+      this.downloadsYear = getDownloadsPerYear(this.rawData)
     },
     setURL () {
       history.pushState({
