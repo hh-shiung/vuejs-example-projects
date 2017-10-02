@@ -1,4 +1,4 @@
-# npm-stats
+# Phase 1
 
 > A Vue.js project
 
@@ -71,3 +71,30 @@ Data model:
 
 Response data has to be processed to get one array only with data (downloads) and one array with labels (days). Use **map**.
 
+# Phase 2
+
+## Adding Datepicker
+
+  yarn add vuejs-datepicker moment
+
+* Import datepicker
+* Add datepicker fields for start and end period
+* Add data models
+
+New `period` composed of `periodStart` and `periodEnd`, `periodEnd` is set to current day. Have to remove time attribute of `Date()`. Suitable for `moment.js`
+
+### Computing period
+
+* Formatted `startDate`
+* Formatted `endDate`
+* Composed `period`
+
+### Processing data
+
+Getting labels (day) and data (downloads).
+
+1. Format `day` key to year
+2. Remove duplicates to have only unique years
+3. Sum all downloads of the same year
+
+Refactor as to extract month and week totals from process. Introduction of helper method to extract logic.

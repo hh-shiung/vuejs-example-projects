@@ -13,6 +13,8 @@
         <button class="search-button" @click="requestData">
           Search
         </button>
+        <datepicker placeholder="Start Date" v-model="periodStart" name="start-date"></datepicker>
+        <datepicker placeholder="End Date" v-model="periodEnd" name="end-date"></datepicker>
       </div>
       <div class="error-message" v-if="showError">
         {{ errorMessage }}
@@ -40,29 +42,51 @@
 
 <script>
 import axios from 'axios'
+import Datepicker from 'vuejs-datepicker'
 import LineChart from '@/components/LineChart'
+
+import {dateToDay, dateBeautify} from '../utils/dateFormatter.js'
 
 export default {
   components: {
+    Datepicker,
     LineChart
   },
-  props: {},
   data () {
     return {
       package: null,
       packageName: '',
-      period: 'last-month',
       loaded: false,
       downloads: [],
       labels: [],
       showError: false,
-      errorMessage: 'Please enter a package name'
+      errorMessage: 'Please enter a package name',
+      periodStart: '',
+      periodEnd: new Date()
     }
   },
   mounted () {
     if (this.$route.params.package) {
       this.package = this.$route.params.package
       this.requestData()
+    }
+  },
+  computed: {
+    _endDate () {
+      return dateToDay(this.periodEnd)
+    },
+    _startDate () {
+      return dateToDay(this.periodStart)
+    },
+    period () {
+      return this.periodStart
+      ? `${this._startDate}:${this._endDate}`
+      : 'last-month'
+    },
+    formattedPeriod () {
+      return this.periodStart
+      ? `${dateBeautify(this._startDate)} - ${dateBeautify(this._endDate)}`
+      : 'last-month'
     }
   },
   methods: {

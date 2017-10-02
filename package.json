@@ -13,9 +13,11 @@
   "dependencies": {
     "axios": "^0.16.2",
     "chart.js": "^2.7.0",
+    "moment": "^2.18.1",
     "vue": "^2.4.2",
     "vue-chartjs": "^2.8.7",
-    "vue-router": "^2.7.0"
+    "vue-router": "^2.7.0",
+    "vuejs-datepicker": "^0.9.16"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
