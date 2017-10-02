@@ -40,6 +40,34 @@
 
       <div class="chart-container" v-if="loaded">
         <div class="chart-title">
+          Downloads per Week <span>{{ formattedPeriod }}</span>
+          <hr />
+        </div>
+        <div class="chart-content">
+          <line-chart 
+            v-if="loaded"
+            :chart-data="downloadsWeek"
+            :chart-labels="labelsWeek"
+          ></line-chart>
+        </div>
+      </div>
+
+      <div class="chart-container" v-if="loaded">
+        <div class="chart-title">
+          Downloads per Month <span>{{ formattedPeriod }}</span>
+          <hr />
+        </div>
+        <div class="chart-content">
+          <line-chart 
+            v-if="loaded"
+            :chart-data="downloadsMonth"
+            :chart-labels="labelsMonth"
+          ></line-chart>
+        </div>
+      </div>
+
+      <div class="chart-container" v-if="loaded">
+        <div class="chart-title">
           Downloads per Year <span>{{ formattedPeriod }}</span>
           <hr />
         </div>
@@ -61,8 +89,15 @@ import axios from 'axios'
 import Datepicker from 'vuejs-datepicker'
 import LineChart from '@/components/LineChart'
 
-import {dateToYear, dateToDay, dateBeautify} from '../utils/dateFormatter.js'
-import {removeDuplicate, getDownloadsPerYear} from '../utils/downloadFormatter.js'
+import {
+  dateToYear,
+  dateToMonth,
+  dateToWeek,
+  dateToDay,
+  dateBeautify
+} from '../utils/dateFormatter.js'
+
+import {removeDuplicate, groupData} from '../utils/downloadFormatter.js'
 
 export default {
   components: {
@@ -75,8 +110,12 @@ export default {
       packageName: '',
       loaded: false,
       downloads: [],
+      downloadsWeek: [],
+      downloadsMonth: [],
       downloadsYear: [],
       labels: [],
+      labelsWeek: [],
+      labelsMonth: [],
       labelsYear: [],
       showError: false,
       errorMessage: 'Please enter a package name',
@@ -127,17 +166,31 @@ export default {
           this.downloads = response.data.downloads.map(entry => entry.downloads)
           this.labels = response.data.downloads.map(entry => entry.day)
           this.packageName = response.data.package
-          this.formatYear()
+          this.totalDownloads = this.downloads.reduce((total, download) => total + download)
           this.setURL()
+          this.groupDataByDate()
           this.loaded = true
         }).catch(err => {
           this.errorMessage = err.response.data.error
           this.showError = true
         })
     },
+    groupDataByDate () {
+      this.formatYear()
+      this.formatMonth()
+      this.formatWeek()
+    },
     formatYear () {
       this.labelsYear = this.rawData.map(entry => dateToYear(entry.day)).reduce(removeDuplicate, [])
-      this.downloadsYear = getDownloadsPerYear(this.rawData)
+      this.downloadsYear = groupData(this.rawData, dateToYear)
+    },
+    formatMonth () {
+      this.labelsMonth = this.rawData.map(entry => dateToMonth(entry.day)).reduce(removeDuplicate, [])
+      this.downloadsMonth = groupData(this.rawData, dateToMonth)
+    },
+    formatWeek () {
+      this.labelsWeek = this.rawData.map(entry => dateToWeek(entry.day)).reduce(removeDuplicate, [])
+      this.downloadsWeek = groupData(this.rawData, dateToWeek)
     },
     setURL () {
       history.pushState({

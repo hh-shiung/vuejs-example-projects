@@ -117,3 +117,13 @@ Import both modules in **Start** and use in `formatYear()` method.
 ### To get unique dates
 
 Chain a `map()` to `reduce()` and return an object with the date and downloads of that date. `filter()` and `dateToYear()` helper, with a final `map()` to clean things up.
+
+## Refactoring for more charts
+
+Data transformer platform is setup for more additional graphs. `getDownloadsPerYear()` can be duplicated and tweaked along with `dateToYear()` helpers too. Yet this is not DRY.
+
+`getDownloadsPerYear()` method needs to be generalised and changed.
+
+1. Rename method to `groupData`
+2. Add second argument to be helper function
+
